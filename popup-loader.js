@@ -11,6 +11,8 @@
   const LANG      = (s.getAttribute('data-lang') || '').toLowerCase();
   const P_COPY    = parseInt(s.getAttribute('data-p-copy')  || '5', 10);
   const P_OPTIN   = parseInt(s.getAttribute('data-p-optin') || '10',10);
+  const COUPON    = s.getAttribute('data-coupon') || 'SAVE5';
+  const PRIVACY   = s.getAttribute('data-privacy') || '';
   const TEASER_POS= (s.getAttribute('data-teaser-pos') || 'bl').toLowerCase();
   const TEASER_INIT = (s.getAttribute('data-teaser-initial') || '0') === '1';
 
@@ -76,7 +78,7 @@
 
     function sizeIframeBase(){
       const vw = Math.max(320, Math.min(window.innerWidth, 1000));
-      const w  = (vw < 520 ?  '96vw' : '840px');
+      const w  = (vw < 520 ?  '96vw' : '740px');
       // altezza di bootstrap: verrà subito rimpiazzata dal messaggio LP_SIZE
       const h  = (vw < 520 ?  560   : 580) + 'px';
       iframe.style.cssText = `
@@ -100,7 +102,9 @@
       + (TAGS  ? '&tags='+encodeURIComponent(TAGS)  : '')
       + (STYLE ? '&css='+encodeURIComponent(STYLE) : '')
       + (LANG  ? '&lang='+encodeURIComponent(LANG)  : '')
-      + `&p1=${encodeURIComponent(P_COPY)}&p2=${encodeURIComponent(P_OPTIN)}`;
+      + `&p1=${encodeURIComponent(P_COPY)}&p2=${encodeURIComponent(P_OPTIN)}`
+      + (PRIVACY ? '&privacy='+encodeURIComponent(PRIVACY) : '')
+      + (COUPON ? '&coupon='+encodeURIComponent(COUPON) : '');
 
     overlay.appendChild(iframe);
     document.body.appendChild(overlay);
