@@ -27,7 +27,7 @@
       err_cfg:"Configurazione mancante.",
       err_network:"Errore di rete. Riprova.",
       err_submit:"Invio non riuscito: {msg}",
-      teaser:"Risparmia il {percent}% — clicca qui"
+      teaser_saving: "RISPARMIA FINO AL {p2}%"
     }
   };
 

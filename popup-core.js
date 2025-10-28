@@ -1,5 +1,11 @@
-// popup-core.js
+// popup-core.js — i18n + resize + notify + copy + submit + postMessage events
 (function(){
+  // 🔹 Event names centralized
+  const EVENTS = {
+    COPY:   'click_btn_copy_coupon',
+    SUBMIT: 'submit_btn_email_coupon'
+  };
+
   function applyI18N(){
     if (!window.LPI18N) return;
     LPI18N.apply(document);
@@ -46,8 +52,9 @@
       const el = document.querySelector('.code-value');
       const text = (el?.textContent || '').trim();
       if (!text) return;
-      try{ await navigator.clipboard.writeText(text); }
-      catch{
+      try{
+        await navigator.clipboard.writeText(text);
+      }catch{
         const ta = document.createElement('textarea');
         ta.value = text; ta.setAttribute('readonly','');
         ta.style.position='fixed'; ta.style.opacity='0';
@@ -56,6 +63,7 @@
       }
       const t = document.getElementById('copyToast');
       if (t){ t.style.display='block'; setTimeout(()=>{ t.style.display='none'; sendSize(); },1200); }
+      try{ window.parent.postMessage({ type:'LP_EVENT', name:EVENTS.COPY, props:{ coupon:text } }, '*'); }catch(_){}
     });
   }
 
@@ -67,7 +75,6 @@
       e.preventDefault();
       if (!form.checkValidity()){ form.reportValidity(); return; }
 
-      // prende anche <button> senza type
       const submitBtn = form.querySelector('button[type="submit"], button:not([type]), input[type="submit"]');
       if (submitBtn){
         submitBtn.disabled = true;
@@ -75,6 +82,8 @@
         submitBtn.setAttribute('aria-busy','true');
       }
       notify('');
+
+      try{ window.parent.postMessage({ type:'LP_EVENT', name:EVENTS.SUBMIT }, '*'); }catch(_){}
 
       const fd = new FormData(form);
       fd.append('consent_ts', new Date().toISOString());
@@ -103,25 +112,15 @@
             try{ h.setAttribute('tabindex','-1'); h.focus(); }catch(_){}
           } else {
             notify((window.LPI18N && LPI18N.t) ? LPI18N.t('done_text') : 'Controlla la tua email.');
-            if (submitBtn){
-              submitBtn.disabled = false;
-              submitBtn.classList.remove('is-loading');
-              submitBtn.removeAttribute('aria-busy');
-            }
-            return;
           }
 
           sendSize();
         } else {
           notify(window.LPI18N ? LPI18N.t('err_submit',{msg:data.msg||r.status}) : 'Invio non riuscito');
-          if (submitBtn){
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('is-loading');
-            submitBtn.removeAttribute('aria-busy');
-          }
         }
       }catch{
         notify(window.LPI18N ? LPI18N.t('err_network') : 'Errore di rete');
+      }finally{
         if (submitBtn){
           submitBtn.disabled = false;
           submitBtn.classList.remove('is-loading');

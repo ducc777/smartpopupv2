@@ -1,7 +1,6 @@
 <?php
-// lead.php — GHL lead collector (GET: account_id, name, email, number?, tags?)
+// lead.php — GHL lead collector (GET/POST: account_id, name, email, number?, tags?, consent_newsletter?, lang?)
 // PHP >= 7.2
-// Author: Duccio + ChatGPT
 
 declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
@@ -15,23 +14,39 @@ $RATE_DIR          = sys_get_temp_dir();
 $RATE_LIMIT_WINDOW = 60;   // sec
 $RATE_LIMIT_MAX    = 30;   // req/min/IP
 $GHL_URL           = 'https://services.leadconnectorhq.com/contacts/';
-$GHL_VERSION       = '2021-07-28'; // richiesto da GHL
+$GHL_VERSION       = '2021-07-28';
 
 /* ========= INPUT ========= */
-$q          = array_merge($_GET, $_POST);
-$account_id = isset($q['account_id']) ? (int)$q['account_id'] : 0;
-$name       = isset($q['name'])       ? clean((string)$q['name'])   : '';
-$email      = isset($q['email'])      ? trim((string)$q['email'])   : '';
-$number     = isset($q['number'])     ? clean((string)$q['number']) : '';
-$tags_raw   = isset($q['tags'])       ? trim((string)$q['tags'])    : '';
+$q                 = array_merge($_GET, $_POST);
+$account_id        = isset($q['account_id']) ? (int)$q['account_id'] : 0;
+$name              = isset($q['name'])       ? clean((string)$q['name'])   : '';
+$email             = isset($q['email'])      ? trim((string)$q['email'])   : '';
+$number            = isset($q['number'])     ? clean((string)$q['number']) : '';
+$tags_raw          = isset($q['tags'])       ? trim((string)$q['tags'])    : '';
+$lang_raw          = isset($q['lang'])       ? strtolower(trim((string)$q['lang'])) : '';
+$newsletter_optin  = isset($q['consent_newsletter']) && ((string)$q['consent_newsletter'] === '1');
+
+/* ---- lingua normalizzata (2 lettere) ---- */
+$lang = 'it';
+if ($lang_raw !== '' && preg_match('/^[a-z]{2}/', $lang_raw, $m)) {
+    $lang = $m[0];
+}
 
 /* ---- tags: tags=a oppure tags=a,b,c ---- */
 $tags = [];
 if ($tags_raw !== '') {
     $tags = array_filter(array_map('clean', array_map('trim', explode(',', $tags_raw))));
-    $tags = array_values(array_unique($tags)); // rimuove duplicati
+    $tags = array_values(array_unique($tags));
     if (count($tags) > 20) $tags = array_slice($tags, 0, 20);
 }
+
+/* ---- aggiungi tag newsletter opt-in o no ---- */
+if ($newsletter_optin) {
+    $tags[] = 'newsletter_optin_granted';
+} else {
+    $tags[] = 'newsletter_optin_denied';
+}
+$tags = array_values(array_unique($tags));
 
 /* ========= VALIDAZIONI ========= */
 if ($account_id <= 0 || !isset($ACCOUNTS[$account_id])) {
@@ -48,9 +63,10 @@ if (!rate_ok(ip(), $RATE_DIR, $RATE_LIMIT_WINDOW, $RATE_LIMIT_MAX)) {
 }
 
 /* ========= ACCOUNT ========= */
-$acc        = $ACCOUNTS[$account_id];
-$token      = $acc['token'];
-$locationId = $acc['locationId'];
+$acc         = $ACCOUNTS[$account_id];
+$token       = $acc['token'];
+$locationId  = $acc['locationId'];
+$langFieldId  = isset($acc['langIdField']) ? trim((string)$acc['langIdField']) : '';
 
 /* ========= LOG ========= */
 $rec = [
@@ -62,6 +78,8 @@ $rec = [
     'number'     => $number,
     'locationId' => $locationId,
     'tags'       => $tags,
+    'newsletter_optin' => $newsletter_optin,
+    'lang'       => $lang,
     'ua'         => $_SERVER['HTTP_USER_AGENT']  ?? null,
     'ref'        => $_SERVER['HTTP_REFERER']     ?? null,
 ];
@@ -73,14 +91,24 @@ $rec = [
 
 /* ========= PAYLOAD GHL ========= */
 list($first, $last) = split_name($name);
+
 $payload = [
     'locationId' => $locationId,
     'email'      => $email,
     'firstName'  => $first,
     'lastName'   => $last,
 ];
+
 if ($number !== '') $payload['phone'] = $number;
 if (!empty($tags))  $payload['tags']  = $tags;
+
+// Campo custom lingua via ID per-account
+if ($langFieldId !== '') {
+    $payload['customFields'][] = [
+        'id'    => $langFieldId,
+        'value' => $lang,
+    ];
+}
 
 /* ========= CHIAMATA GHL ========= */
 $ch = curl_init($GHL_URL);
@@ -92,7 +120,7 @@ curl_setopt_array($ch, [
         "Version: {$GHL_VERSION}",
         "LocationId: {$locationId}",
     ],
-    CURLOPT_POSTFIELDS     => json_encode($payload),
+    CURLOPT_POSTFIELDS     => json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT        => 15,
 ]);
@@ -105,4 +133,9 @@ if ($code >= 200 && $code < 300) {
     out(['ok' => true, 'msg' => 'lead forwarded']);
 }
 
-out(['ok' => false, 'msg' => 'GHL error', 'http_code' => $code, 'body' => $resp], 502);
+out([
+    'ok'        => false,
+    'msg'       => 'GHL error',
+    'http_code' => $code,
+    'body'      => $resp,
+], 502);
