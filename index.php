@@ -1,5 +1,10 @@
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<style>
+  html,body{height:100%;margin:0;padding:0}
+</style>
 </head>
 <body>
   
