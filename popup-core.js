@@ -1,11 +1,15 @@
-// popup-core.js — i18n + resize + notify + copy + submit + postMessage events
+// popup-core.js — gestisce i18n, resize, copy, submit e tracking eventi
 (function(){
-  // 🔹 Event names centralized
+  // 🔹 Eventi tracciati
   const EVENTS = {
+    SHOW:   'show_popup_coupon',
+    CLOSE:  'closed_popup_coupon',
     COPY:   'click_btn_copy_coupon',
-    SUBMIT: 'submit_btn_email_coupon'
+    SUBMIT: 'submit_btn_email_coupon',
+    REOPEN: 'reopen_popup_coupon'
   };
 
+  // --- i18n render ---
   function applyI18N(){
     if (!window.LPI18N) return;
     LPI18N.apply(document);
@@ -20,6 +24,7 @@
     if (doneTxt) doneTxt.textContent = LPI18N.t('done_text',{p2});
   }
 
+  // --- invia altezza al parent ---
   function sendSize(){
     try{
       const card = document.getElementById('card');
@@ -28,6 +33,7 @@
       window.parent.postMessage({ type:'LP_SIZE', h }, '*');
     }catch(_){}
   }
+
   function bindResize(){
     const card = document.getElementById('card');
     if (!card) return;
@@ -37,6 +43,7 @@
     setTimeout(sendSize, 50);
   }
 
+  // --- notify inline ---
   function notify(msg){
     const n = document.getElementById('formNotice');
     if (!n) return;
@@ -45,6 +52,7 @@
     sendSize();
   }
 
+  // --- copia coupon ---
   function bindCopy(){
     const btn = document.getElementById('copyBtn');
     if (!btn) return;
@@ -62,18 +70,27 @@
         try{ document.execCommand('copy'); } finally { ta.remove(); }
       }
       const t = document.getElementById('copyToast');
-      if (t){ t.style.display='block'; setTimeout(()=>{ t.style.display='none'; sendSize(); },1200); }
-      try{ window.parent.postMessage({ type:'LP_EVENT', name:EVENTS.COPY, props:{ coupon:text } }, '*'); }catch(_){}
+      if (t){
+        t.style.display='block';
+        setTimeout(()=>{ t.style.display='none'; sendSize(); },1200);
+      }
+      try{
+        window.parent.postMessage({ type:'LP_EVENT', name:EVENTS.COPY, props:{ coupon:text } }, '*');
+      }catch(_){}
     });
   }
 
+  // --- submit lead form ---
   function bindForm(){
     const form = document.getElementById('leadForm');
     if (!form) return;
 
     form.addEventListener('submit', async (e)=>{
       e.preventDefault();
-      if (!form.checkValidity()){ form.reportValidity(); return; }
+      if (!form.checkValidity()){
+        form.reportValidity();
+        return;
+      }
 
       const submitBtn = form.querySelector('button[type="submit"], button:not([type]), input[type="submit"]');
       if (submitBtn){
@@ -83,10 +100,15 @@
       }
       notify('');
 
-      try{ window.parent.postMessage({ type:'LP_EVENT', name:EVENTS.SUBMIT }, '*'); }catch(_){}
+      try{
+        window.parent.postMessage({ type:'LP_EVENT', name:EVENTS.SUBMIT }, '*');
+      }catch(_){}
 
       const fd = new FormData(form);
       fd.append('consent_ts', new Date().toISOString());
+      if (form.querySelector('#consent_newsletter')?.checked) {
+        fd.append('newsletter_optin', '1');
+      }
 
       try{
         const r = await fetch('lead.php', { method:'POST', body: fd, cache:'no-store' });
@@ -95,8 +117,8 @@
         if (data.ok){
           const notice = document.getElementById('formNotice');
           if (notice) notice.style.display='none';
+          form.style.display='none';
 
-          form.style.display = 'none';
           const parentBox = form.closest('.box') || form.parentElement;
           if (parentBox){
             const heading = parentBox.querySelector('h3');
@@ -130,10 +152,37 @@
     });
   }
 
+  // --- init + tracking base ---
   document.addEventListener('DOMContentLoaded', ()=>{
     applyI18N();
     bindResize();
     bindCopy();
     bindForm();
+
+    try {
+      window.parent.postMessage({ type:'LP_EVENT', name:EVENTS.SHOW }, '*');
+    } catch(_){}
+  });
+
+  // --- eventi globali per chiusura/riapertura ---
+  window.addEventListener('message', (ev)=>{
+    if (!ev.data || !ev.data.type) return;
+    if (ev.data.type === 'LP_CLOSE'){
+      try{
+        window.parent.postMessage({ type:'LP_EVENT', name:EVENTS.CLOSE }, '*');
+      }catch(_){}
+    }
+    if (ev.data.type === 'LP_REOPEN'){
+      try{
+        window.parent.postMessage({ type:'LP_EVENT', name:EVENTS.REOPEN }, '*');
+      }catch(_){}
+    }
+  });
+
+  // --- orientamento e visibilità ---
+  window.addEventListener('orientationchange', () => setTimeout(sendSize, 150));
+  window.addEventListener('resize', () => setTimeout(sendSize, 80));
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) setTimeout(sendSize, 80);
   });
 })();
