@@ -7,7 +7,7 @@
 </style>
 </head>
 <body>
-  <h1>test smart popupv2</h1>
+  <h1>test smart popup v3</h1>
   
 <script src="./popup-loader.js"
   data-account="1"
