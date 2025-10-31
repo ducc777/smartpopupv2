@@ -85,6 +85,21 @@
   let overlay=null, iframe=null, teaser=null;
   let lastProps=null;
 
+  // 🧩 gestione larghezza iframe: desktop invariato, mobile 96vw con min 320
+  const MOBILE_BREAKPOINT = 560;
+
+  function setIframeWidth(i){
+    if (!i) return;
+    if (window.innerWidth > MOBILE_BREAKPOINT) {
+      i.style.width = '740px';     // desktop fisso
+      return;
+    }
+    const w = Math.max(320, Math.round(window.innerWidth * 0.96));
+    i.style.width = w + 'px';      // mobile fluido
+  }
+  
+  function onResize(){ setIframeWidth(iframe); }
+
   function removeTeaser(){ if (teaser){ teaser.remove(); teaser=null; } }
 
   function teaserLabel(p2){
@@ -124,6 +139,7 @@
     if (overlay){ overlay.remove(); overlay=null; }
     window.removeEventListener('message', onMsg);
     document.removeEventListener('keydown', onKey);
+    window.removeEventListener('resize', onResize);  // 🔴 cleanup listener width
     showTeaser(lastProps && lastProps.p2);
     routeTrack(EVENTS.CLOSE, {
       coupon: lastProps?.couponCopy, p1: lastProps?.p1, p2: lastProps?.p2, tags: lastProps?.tagsCombined
@@ -144,6 +160,7 @@
     iframe = document.createElement('iframe');
     iframe.sandbox = 'allow-forms allow-scripts allow-same-origin';
     iframe.allow   = 'clipboard-write';
+    // width di default per desktop; mobile viene gestito da setIframeWidth()
     iframe.style.cssText='width:740px;max-width:96vw;height:580px;border:0;border-radius:22px;background:#fff;box-shadow:0 18px 48px rgba(0,0,0,.22);';
 
     const { p1, p2, couponCopy, tagsCombined, lang, utmQS } = props;
@@ -162,6 +179,10 @@
 
     overlay.appendChild(iframe);
     document.body.appendChild(overlay);
+
+    // 🔵 applica larghezza responsiva e attiva listener solo quando aperto
+    setIframeWidth(iframe);
+    window.addEventListener('resize', onResize);
 
     window.addEventListener('message', onMsg);
     document.addEventListener('keydown', onKey);

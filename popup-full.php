@@ -14,7 +14,7 @@ $css       = $_GET['css'] ?? 'v2';
 <html lang="<?= h($lang) ?>">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Popup</title>
   <link rel="stylesheet" href="css/<?= h($css) ?>.css">
   <script src="./lp-i18n.js"></script>

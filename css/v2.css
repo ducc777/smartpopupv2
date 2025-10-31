@@ -113,3 +113,22 @@ p{margin:0 0 12px;}
   animation: lp-spin 0.9s linear infinite;
 }
 @keyframes lp-spin { to { transform: rotate(360deg); } }
+
+
+/* ---- Mobile-only tweaks (≤420px) ---- */
+@media (max-width: 420px){
+  html { -webkit-text-size-adjust: 100%; }
+  body { font-size: 16px; }                 /* anti-zoom iOS */
+
+  .card { width: min(96vw, 520px); padding: 16px; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .box  { padding: 14px; }
+
+  .title    { font-size: clamp(18px, 4.8vw, 22px); line-height: 1.25; }
+  .subtitle { font-size: clamp(13px, 3.8vw, 16px); line-height: 1.35; }
+  .box h3   { font-size: clamp(15px, 4.2vw, 18px); line-height: 1.25; }
+
+  .input { font-size: 16px; min-height: 44px; padding: 10px 12px; }
+  .btn   { font-size: 16px; min-height: 44px; padding: 10px 14px; }
+}
+
