@@ -91,11 +91,12 @@
   function setIframeWidth(i){
     if (!i) return;
     if (window.innerWidth > MOBILE_BREAKPOINT) {
-      i.style.width = '740px';     // desktop fisso
+      i.style.width = '740px';           // desktop fisso
       return;
     }
-    const w = Math.max(320, Math.round(window.innerWidth * 0.96));
-    i.style.width = w + 'px';      // mobile fluido
+    // Mobile: cap a 420px, lascia minimo 320px e margine laterale
+    const w = Math.max(320, Math.min(420, Math.round(window.innerWidth - 24)));
+    i.style.width = w + 'px';
   }
   
   function onResize(){ setIframeWidth(iframe); }

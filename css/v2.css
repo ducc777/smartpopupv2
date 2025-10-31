@@ -1,134 +1,250 @@
+/* ===== Base / Reset ===== */
 :root{
-  --bg:#fff; --text:#111827; --muted:#6b7280; --accent:#111827;
-  --accent-light:#f9fafb; --radius:18px;
+  --bg:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --outline:#e5e7eb;
+  --outline-strong:#e2e8f0;
+  --soft:#f7f8fa;
+  --primary:#0f172a;
+  --primary-contrast:#ffffff;
+  --chip:#e5e7eb;
+  --chip-text:#111827;
+  --ok:#16a34a;
 }
 
-/* Base */
+*{box-sizing:border-box}
+html,body{height:100%}
+html{-webkit-text-size-adjust:100%}
 body{
   margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Roboto,Helvetica,Arial,sans-serif;
-  background:var(--bg); color:var(--text);
-  font-size:15px; line-height:1.5;
+  font-family:ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  color:var(--text);
+  background:transparent;
 }
 
-/* Overlay & Card */
-.overlay{ display:flex; justify-content:center; align-items:center; min-height:100vh; width:100%; background:transparent; }
+/* ===== Overlay + Card ===== */
+.overlay{
+  position:fixed; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(17,24,39,.55);
+  padding:24px;
+  z-index:2147483647;
+}
 .card{
-  position:relative; background:var(--bg); border-radius:var(--radius);
-  box-shadow:none; padding:16px 0px;
-  max-width:740px; width:92vw; box-sizing:border-box;
+  position:relative;
+  width:100%;
+  max-width:980px;                 /* desktop width “storica” */
+  background:var(--bg);
+  border-radius:20px;
+  box-shadow:0 10px 40px rgba(0,0,0,.25);
+  padding:32px 36px 28px;
+}
+.close{
+  position:absolute; top:18px; right:18px;
+  width:34px; height:34px; border:0; border-radius:50%;
+  background:#f3f4f6; color:#374151; cursor:pointer; font-size:18px;
+}
+.close:focus{outline:2px solid #94a3b8; outline-offset:2px}
+
+/* ===== Title ===== */
+.title{margin:0 0 6px; font-weight:800; line-height:1.15;
+  font-size:clamp(22px, 2.3vw, 34px);
+}
+.subtitle{margin:0 0 22px; color:var(--muted); font-size:clamp(14px,1.4vw,18px)}
+
+/* ===== Grid 2 colonne desktop, 1 col mobile ===== */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:22px;
 }
 
-/* Header */
-.title{margin:0 0 2px; font-size:1.6rem; font-weight:700;}
-.subtitle{margin:4px 0 18px; color:var(--muted); font-size:1rem;}
-
-/* Layout colonne */
-.grid{display:flex; gap:14px;}
+/* ===== Box ===== */
 .box{
-  flex:1; padding:16px 14px;
-  border:1px solid #e5e7eb; border-radius:14px; box-shadow:none;
+  border:1px solid var(--outline);
+  border-radius:16px;
+  padding:20px 18px;
+  background:#fff;
 }
-.box--hl{background:var(--accent-light);}
-h3{margin:0 0 8px; font-size:1.05rem;}
-p{margin:0 0 12px;}
+.box--hl{ background:#fbfcff; border-color:var(--outline-strong); }
 
-/* Coupon clean */
+.box h3{margin:0 0 10px; font-size:clamp(18px,1.6vw,22px)}
+.box p{margin:0 0 16px; color:#374151; font-size:clamp(14px,1.2vw,16px)}
+
+/* ===== Coupon line ===== */
 .code-block{
-  display:flex; align-items:center; gap:10px;
-  padding:10px 14px; background:#f9fafb; border:none; border-radius:14px;
+  display:flex; align-items:center; justify-content:flex-start;
+  gap:10px; padding:12px; border-radius:14px;
+  background:var(--soft); border:1px solid var(--outline);
 }
 .code-label{
-  display:inline-flex; align-items:center; justify-content:center;
-  height:34px; padding:0 14px; border-radius:9999px; background:#e5e7eb;
-  color:#374151; font-size:13px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.35);
+  padding:10px 16px; border-radius:999px;
+  background:var(--chip); color:var(--chip-text);
+  font-weight:700; letter-spacing:.06em; font-size:14px;
 }
 .code-value{
-  display:inline-flex; align-items:center;
-  height:34px; padding:0 14px; border-radius:10px; background:#fff;
-  border:1px solid #e5e7eb;
-  font-family:ui-monospace,Menlo,Consolas,monospace; font-weight:700; font-size:1.1rem; color:#111827;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.4);
+  min-width:84px; padding:10px 14px; border-radius:10px;
+  background:#fff; border:1px solid var(--outline);
+  font-weight:800; font-size:18px; text-align:center;
 }
 
-/* Inputs & Buttons */
-.inputs{display:flex; gap:8px;}
+/* ===== Inputs ===== */
 .input{
-  width:100%; padding:9px 11px; border:1px solid #e5e7eb; border-radius:10px;
-  font-size:.95rem; box-sizing:border-box; box-shadow:none;
+  width:100%;
+  appearance:none;
+  border:1px solid var(--outline);
+  background:#fff;
+  border-radius:12px;
+  padding:12px 14px;
+  font-size:16px;        /* >=16px evita zoom iOS */
+  line-height:1.3;
+  color:var(--text);
 }
-.btn{
-  border:none; border-radius:10px; padding:9px 14px; font-weight:600; cursor:pointer;
-  transition:opacity .2s ease; box-shadow:none;
+.inputs{display:flex; gap:12px}
+.inputs .input{flex:1}
+
+.input:focus{outline:2px solid #94a3b8; outline-offset:1px}
+
+/* ===== Consent ===== */
+.consent{margin:14px 0 6px; display:grid; gap:10px}
+.consent__label{display:flex; gap:10px; align-items:flex-start; font-size:14px; color:#374151}
+.consent__label input{margin-top:2px; width:18px; height:18px}
+
+/* ===== Buttons ===== */
+.btn{display:inline-flex; align-items:center; justify-content:center; cursor:pointer; border-radius:12px; border:1px solid #11182718; padding:12px 16px; font-weight:700}
+.btn.primary{background:var(--primary); color:var(--primary-contrast); border-color:transparent}
+.btn.secondary{background:#fff; color:var(--text)}
+.btn[disabled]{opacity:.6; cursor:default}
+
+/* toast copy */
+.toast{margin-top:8px; font-size:14px; color:var(--ok)}
+
+/* ===== Inline notice (error) ===== */
+.notice{margin-top:10px; padding:10px 12px; border-radius:10px; background:#fef2f2; color:#991b1b; border:1px solid #fee2e2; font-size:14px}
+
+/* ===== Success block ===== */
+#success{
+  border:1px dashed var(--outline);
+  border-radius:16px; padding:18px;
+  background:#fbfdff;
 }
-.btn.primary{background:var(--accent); color:#fff;}
-.btn.secondary{background:#fff; color:var(--accent); border:1px solid var(--accent);}
-.btn:hover{opacity:.9;}
+#success h4{margin:0 0 8px; font-size:clamp(18px,1.5vw,22px)}
+#success p{margin:0 0 12px; color:#374151}
 
-/* GDPR consent */
-.consent{ margin-top:14px; }
-.consent__label{ display:flex; align-items:flex-start; gap:10px; font-size:.78rem; color:#111827; cursor:pointer; }
-.consent__label input[type="checkbox"]{
-  width:18px; height:18px; margin-top:2px;
-  border:1px solid #cbd5e1; border-radius:4px; appearance:none; outline:0; background:#fff;
+/* ===== Desktop fine-tuning ===== */
+@media (min-width: 992px){
+  .card{padding:36px 40px 30px}
+  .box{padding:22px 20px}
 }
-.consent__label input[type="checkbox"]:checked{
-  background:#111827; border-color:#111827;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 16 12' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%23fff' d='M6.2 11.1L.9 5.8l1.6-1.6 3.7 3.7L13.5.6l1.6 1.6z'/%3E%3C/svg%3E");
-  background-repeat:no-repeat; background-position:center; background-size:12px;
+
+/* ===== Mobile: 1 colonna, full-width, font ridotti equilibrati ===== */
+@media (max-width: 768px){
+  .overlay{padding:14px}
+  .card{max-width:640px; border-radius:16px; padding:18px 16px}
+  .grid{grid-template-columns:1fr; gap:14px}
+  .inputs{flex-direction:column}
+  .code-block{padding:10px}
+  .code-label{font-size:13px; padding:8px 12px}
+  .code-value{font-size:16px; padding:8px 12px}
+  .btn{width:100%}
 }
-.consent__fineprint{ display:block; margin-top:6px; font-size:.78rem; color:#6b7280; }
-.consent__fineprint a{ color:inherit; text-decoration:underline; }
 
-/* Close & misc */
-.close{ position:absolute; top:22px; right:22px; background:none; border:none; font-size:1rem; cursor:pointer; opacity:.7; transition:opacity .2s; }
-.close:hover{ opacity:1; }
-.toast{ font-size:.9rem; margin-top:6px; color:var(--muted); }
-.fineprint{ margin-top:20px; font-size:.8rem; color:var(--muted); text-align:center; line-height:1.4; }
-
-/* Responsive */
-@media (max-width:720px){ .grid{flex-direction:column; gap:12px;} }
-@media (max-width:500px){ .inputs{flex-direction:column;} .card{padding:14px 12px; width:96vw;} .box{padding:14px 12px;} }
-
-
-.btn.is-loading {
-  position: relative;
-  opacity: .6;
-  cursor: wait;
-  pointer-events: none;
-  padding-right: 34px; /* spazio per spinner */
+/* ===== Very small phones (iPhone SE, 320–360px) ===== */
+@media (max-width: 360px){
+  .title{font-size:22px}
+  .subtitle{font-size:13px}
+  .box h3{font-size:17px}
+  .input{padding:11px 12px; font-size:16px}
+  .code-label{font-size:12px}
 }
-.btn.is-loading::after {
-  content: "";
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  width: 14px;
-  height: 14px;
-  margin-top: -7px;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: lp-spin 0.9s linear infinite;
+
+/* ===== Teaser (se usato) ===== */
+.teaser{
+  position:fixed; bottom:16px; left:16px;
+  background:#111827; color:#fff; font-weight:800;
+  padding:10px 14px; border-radius:999px; font-size:14px;
+  box-shadow:0 6px 20px rgba(0,0,0,.25);
+  cursor:pointer; z-index:2147483646;
 }
-@keyframes lp-spin { to { transform: rotate(360deg); } }
+.teaser:focus{outline:2px solid #94a3b8; outline-offset:2px}
 
 
-/* ---- Mobile-only tweaks (≤420px) ---- */
-@media (max-width: 420px){
-  html { -webkit-text-size-adjust: 100%; }
-  body { font-size: 16px; }                 /* anti-zoom iOS */
+/* ====== LAYOUT RESPONSIVE SENZA CAMBIARE IL PHP ====== */
 
-  .card { width: min(96vw, 520px); padding: 16px; }
-  .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
-  .box  { padding: 14px; }
-
-  .title    { font-size: clamp(18px, 4.8vw, 22px); line-height: 1.25; }
-  .subtitle { font-size: clamp(13px, 3.8vw, 16px); line-height: 1.35; }
-  .box h3   { font-size: clamp(15px, 4.2vw, 18px); line-height: 1.25; }
-
-  .input { font-size: 16px; min-height: 44px; padding: 10px 12px; }
-  .btn   { font-size: 16px; min-height: 44px; padding: 10px 14px; }
+/* Card centrata e dimensioni sane */
+.card{
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 28px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 10px 40px rgba(0,0,0,.12);
 }
+
+/* Spaziatura titoli */
+.title{ margin: 0 0 8px; font-size: 28px; line-height: 1.2; }
+.subtitle{ margin: 0 0 24px; color: #6b7280; }
+
+/* Box generici già presenti nel markup */
+.box{
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  margin: 12px 0;
+}
+
+/* Desktop: due colonne per i primi due .box dentro .card */
+@media (min-width: 900px){
+  .card{
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* due colonne */
+    grid-auto-rows: minmax(min-content, max-content);
+    column-gap: 24px;
+    row-gap: 18px;
+  }
+
+  /* titolo + sottotitolo a tutta larghezza */
+  .title, .subtitle{ grid-column: 1 / -1; }
+
+  /* i primi due blocchi diventano affiancati;
+     gli eventuali box successivi torneranno sotto a tutta larghezza */
+  .card > .box:nth-of-type(1){ grid-column: 1; }
+  .card > .box:nth-of-type(2){ grid-column: 2; }
+  .card > .box:nth-of-type(n+3){ grid-column: 1 / -1; }
+
+  /* rimuove i margin verticali interni quando usiamo la griglia */
+  .card > .box{ margin: 0; }
+}
+
+/* Mobile: colonna singola (default) */
+@media (max-width: 899.98px){
+  .card{ display: block; }
+}
+
+/* --- Dettagli estetici non invasivi --- */
+.code-block{
+  display: flex; align-items: center; gap: 12px;
+  background: #f7f8fa; border-radius: 12px; padding: 14px;
+}
+.code-label{
+  font-size: 14px; letter-spacing: .08em; text-transform: uppercase;
+  color: #6b7280; background:#e8ebf0; border-radius: 999px;
+  padding: 8px 12px; font-weight: 600;
+}
+.code-value{
+  font-weight: 700; font-size: 18px; background:#fff; border-radius: 10px;
+  padding: 8px 14px; border: 1px solid #e5e7eb;
+}
+
+.btn{ display:inline-flex; align-items:center; justify-content:center;
+  gap:8px; border-radius:12px; padding:12px 16px; font-weight:700;
+  border:1px solid #111827; background:#111827; color:#fff; }
+.btn--secondary{ background:#fff; color:#111827; border-color:#111827; }
+
+.toast{ margin-top:8px; font-size:14px; color:#065f46; }
+
+/* Accessibilità checkbox / input */
+.box input[type="text"], .box input[type="email
 
